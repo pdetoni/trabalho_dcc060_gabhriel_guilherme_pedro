@@ -14,7 +14,11 @@ const NavLinks = ({
   const pathname = usePathname();
   const baseStyle = `${className} flex items-center justify-center p-2 rounded-md font-semibold hover:bg-gray-200 hover:text-primary`;
   const links = [
-    { href: "/agendamento", label: "Agendamento", icon: <AiOutlineSchedule /> },
+    {
+      href: "/agendamentos",
+      label: "Agendamento",
+      icon: <AiOutlineSchedule />,
+    },
     { href: "/persons", label: "Pessoas", icon: <FaUserAlt /> },
   ];
 

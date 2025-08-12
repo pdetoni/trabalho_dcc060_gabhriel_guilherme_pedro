@@ -20,8 +20,8 @@ const Header = () => {
   return (
     <header className="bg-gray-100 sticky top-0 z-[10]">
       <div className="p-1 sm:px-6 justify-between shadow-lg flex items-center  ">
-        <Link href={"/agendamento"} className="flex items-center mb-auto">
-          <Image src={"file.svg"} alt="" width={32} height={32} />
+        <Link href={"/agendamentos"} className="flex items-center mb-auto">
+          <Image src={"/paw-logo.png"} alt="" width={32} height={32} />
           <h1 className="text-3xl ml-2 font-ptSerif text-blue-700">
             Sistema Médico
           </h1>

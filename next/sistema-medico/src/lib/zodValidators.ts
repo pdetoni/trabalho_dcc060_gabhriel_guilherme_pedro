@@ -17,18 +17,27 @@ const medicoSchema = z.object({
   nome: z.string(),
 });
 
-const medicoSchemaArray = z.array(medicoSchema);
+const pacienteSchema = z.object({
+  id_paciente: z.number().int(),
+  nome: z.string(),
+});
 
 const agendamentoSchemaArray = z.array(agendamentoSchema);
 
+const medicoSchemaArray = z.array(medicoSchema);
+
+const pacienteSchemaArray = z.array(pacienteSchema);
+
 type Agendamento = z.infer<typeof agendamentoSchema>;
 type Medico = z.infer<typeof medicoSchema>;
+type Paciente = z.infer<typeof pacienteSchema>;
 
-export type { Agendamento, Medico };
+export type { Agendamento, Medico, Paciente };
 
 export {
   agendamentoSchema,
   agendamentoSchemaArray,
   medicoSchema,
   medicoSchemaArray,
+  pacienteSchemaArray,
 };

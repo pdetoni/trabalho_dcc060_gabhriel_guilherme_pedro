@@ -15,6 +15,8 @@ import {
   Agendamento,
   Medico,
   medicoSchemaArray,
+  Paciente,
+  pacienteSchemaArray,
 } from "../../lib/zodValidators";
 import { useCallback, useEffect, useState } from "react";
 import { formatDateToInput } from "../../lib/formatters";
@@ -30,6 +32,7 @@ const AgendamentoEditDialog = ({
   handleClose: (reloadTable: boolean) => void;
 }) => {
   const [medicos, setMedicos] = useState<Medico[]>([]);
+  const [pacientes, setPacientes] = useState<Paciente[]>([]);
   const [localAgendamento, setLocalAgendamento] = useState<Agendamento | null>(
     selectedItem
   );
@@ -39,9 +42,9 @@ const AgendamentoEditDialog = ({
     id_recepcionista: number | null;
     data_hora: Date | null;
   }>({
-    id_paciente: 1,
-    id_medico: 1,
-    id_recepcionista: 1,
+    id_paciente: 0,
+    id_medico: 0,
+    id_recepcionista: 0,
     data_hora: new Date(),
   });
 
@@ -72,7 +75,15 @@ const AgendamentoEditDialog = ({
       setMedicos(parsedData);
     };
 
+    const fetchPacientes = async () => {
+      const response = await fetch("/api/paciente", { method: "GET" });
+      const data = await response.json();
+      const parsedData = pacienteSchemaArray.parse(data);
+      setPacientes(parsedData);
+    };
+
     fetchMedicos();
+    fetchPacientes();
   }, []);
 
   console.log(createLocalAgendamento);
@@ -108,12 +119,24 @@ const AgendamentoEditDialog = ({
         ) : (
           <>
             <CAutocomplete
-              options={medicos}
+              options={pacientes}
               mapValue={true}
-              optionValue="id_medico"
+              optionValue="id_paciente"
               optionLabel="nome"
               label="Paciente"
+              value={
+                pacientes.find(
+                  (paciente) =>
+                    paciente.id_paciente === createLocalAgendamento.id_paciente
+                ) || null
+              }
               className="w-full"
+              onChange={(value) =>
+                setCreateLocalAgendamento((prev) => ({
+                  ...prev,
+                  id_paciente: Number(value),
+                }))
+              }
             />
             <CAutocomplete
               options={medicos}

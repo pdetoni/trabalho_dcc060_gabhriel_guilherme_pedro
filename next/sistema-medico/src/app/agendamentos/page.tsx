@@ -12,14 +12,13 @@ import { IoMdClose } from "react-icons/io";
 import { IoReload } from "react-icons/io5";
 import AgendamentosTable from "./agendamentosTable";
 import { Agendamento, agendamentoSchemaArray } from "../../lib/zodValidators";
+import AgendamentoEditDialog from "./agendamentoEditDialog";
 
 const Agendamentos = () => {
   const [openEdit, setOpenEdit] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedItem, setSelectedItem] = useState<null | Agendamento>(null);
   const [agendamentos, setAgendamentos] = useState<Agendamento[]>([]);
-
-  const [dialogTitle, setDialogTitle] = useState("");
 
   const fetchAgendamentos = async () => {
     try {
@@ -41,18 +40,19 @@ const Agendamentos = () => {
   }, []);
 
   const handleOpenEdit = (agendamento: Agendamento) => {
-    setDialogTitle("Editar");
     setSelectedItem(agendamento);
     setOpenEdit(true);
   };
 
-  const handleCloseEdit = () => {
+  const handleCloseEdit = (reloadTable: boolean) => {
     setOpenEdit(false);
     setSelectedItem(null);
+    if (reloadTable) {
+      fetchAgendamentos();
+    }
   };
 
   const handleOpenCreate = () => {
-    setDialogTitle("Cadastrar");
     setSelectedItem(null);
     setOpenEdit(true);
   };
@@ -78,7 +78,11 @@ const Agendamentos = () => {
         />
       )}
 
-      {/* Dialog edição */}
+      <AgendamentoEditDialog
+        selectedItem={selectedItem}
+        open={openEdit}
+        handleClose={handleCloseEdit}
+      />
     </div>
   );
 };

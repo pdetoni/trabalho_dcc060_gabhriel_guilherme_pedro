@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import Header from "./components/Header";
 import Main from "./components/Main";
+import LocalizationDateProvider from "./localizationDateProvider";
 
 export const metadata: Metadata = {
   title: "Sistema Médico",
@@ -16,8 +17,10 @@ export default function RootLayout({
   return (
     <html lang="pt-BR">
       <body>
-        <Header />
-        <Main>{children}</Main>
+        <LocalizationDateProvider>
+          <Header />
+          <Main>{children}</Main>
+        </LocalizationDateProvider>
       </body>
     </html>
   );

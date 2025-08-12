@@ -8,4 +8,17 @@ const timeFormatter = new Intl.DateTimeFormat("pt-BR", {
   minute: "2-digit",
 });
 
-export { dateFormatter, timeFormatter };
+function formatDateToInput(value: Date | null): string {
+  if (!value) return "";
+  const pad = (n: number) => n.toString().padStart(2, "0");
+
+  const year = value.getFullYear();
+  const month = pad(value.getMonth() + 1);
+  const day = pad(value.getDate());
+  const hours = pad(value.getHours());
+  const minutes = pad(value.getMinutes());
+
+  return `${year}-${month}-${day}T${hours}:${minutes}`;
+}
+
+export { dateFormatter, timeFormatter, formatDateToInput };

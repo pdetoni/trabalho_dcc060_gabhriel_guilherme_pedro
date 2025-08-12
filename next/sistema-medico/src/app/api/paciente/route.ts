@@ -7,7 +7,8 @@ export async function GET(request: Request) {
     queryBuilder
       .append("select p.id_paciente, pe.nome")
       .append("from paciente p")
-      .append("join pessoa pe on p.id_pessoa = pe.id_pessoa");
+      .append("join pessoa pe on p.id_pessoa = pe.id_pessoa")
+      .append("where p.ativo = true");
 
     const result = await pool.query(queryBuilder.toString());
     return new Response(JSON.stringify(result.rows), {

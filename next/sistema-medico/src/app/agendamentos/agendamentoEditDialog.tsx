@@ -17,6 +17,8 @@ import {
   medicoSchemaArray,
   Paciente,
   pacienteSchemaArray,
+  Recepcionista,
+  recepcionistaSchemaArray,
 } from "../../lib/zodValidators";
 import { useCallback, useEffect, useState } from "react";
 import { formatDateToInput } from "../../lib/formatters";
@@ -33,6 +35,7 @@ const AgendamentoEditDialog = ({
 }) => {
   const [medicos, setMedicos] = useState<Medico[]>([]);
   const [pacientes, setPacientes] = useState<Paciente[]>([]);
+  const [recepcionistas, setRecepcionistas] = useState<Recepcionista[]>([]);
   const [localAgendamento, setLocalAgendamento] = useState<Agendamento | null>(
     selectedItem
   );
@@ -82,8 +85,16 @@ const AgendamentoEditDialog = ({
       setPacientes(parsedData);
     };
 
+    const fetchRecepcionistas = async () => {
+      const response = await fetch("/api/recepcionista", { method: "GET" });
+      const data = await response.json();
+      const parsedData = recepcionistaSchemaArray.parse(data);
+      setRecepcionistas(parsedData);
+    };
+
     fetchMedicos();
     fetchPacientes();
+    fetchRecepcionistas();
   }, []);
 
   console.log(createLocalAgendamento);
@@ -159,15 +170,25 @@ const AgendamentoEditDialog = ({
               }
             />
             <CAutocomplete
-              options={[
-                { id: 1, name: "a" },
-                { id: 2, name: "b" },
-              ]}
+              options={recepcionistas}
               mapValue={true}
-              optionValue="id"
-              optionLabel="name"
+              optionValue="id_recepcionista"
+              optionLabel="nome"
               label="Recepcionista"
+              value={
+                recepcionistas.find(
+                  (recepcionista) =>
+                    recepcionista.id_recepcionista ===
+                    createLocalAgendamento.id_recepcionista
+                ) || null
+              }
               className="w-full"
+              onChange={(value) =>
+                setCreateLocalAgendamento((prev) => ({
+                  ...prev,
+                  id_recepcionista: Number(value),
+                }))
+              }
             />
             <TextField
               label="Data/Horário"

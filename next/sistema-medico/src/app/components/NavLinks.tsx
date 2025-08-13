@@ -19,7 +19,6 @@ const NavLinks = ({
       label: "Agendamento",
       icon: <AiOutlineSchedule />,
     },
-    { href: "/persons", label: "Pessoas", icon: <FaUserAlt /> },
   ];
 
   return (

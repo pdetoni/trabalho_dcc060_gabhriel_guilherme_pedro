@@ -5,4 +5,11 @@ const agendamentoStatusMap = new Map<number, string>([
   [3, "Concluído"],
 ]);
 
-export { agendamentoStatusMap };
+const agendamentoStatusArray = [
+  { id: 0, nome: "Cancelado" },
+  { id: 1, nome: "Agendado" },
+  { id: 2, nome: "Ausente" },
+  { id: 3, nome: "Concluído" },
+];
+
+export { agendamentoStatusMap, agendamentoStatusArray };

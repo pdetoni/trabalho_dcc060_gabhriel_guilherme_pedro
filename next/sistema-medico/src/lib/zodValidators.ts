@@ -10,6 +10,7 @@ const agendamentoSchema = z.object({
   nome_paciente: z.string(),
   data_hora: z.coerce.date(),
   status: z.int(),
+  observacoes: z.string().nullish(),
 });
 
 const medicoSchema = z.object({

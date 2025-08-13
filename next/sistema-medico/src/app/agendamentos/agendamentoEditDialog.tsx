@@ -24,6 +24,7 @@ import { useCallback, useEffect, useState } from "react";
 import { formatDateToInput } from "../../lib/formatters";
 import CAutocomplete from "../components/CAutoComplete";
 import { useLoadingOverlay } from "../components/context/loadingOverlay";
+import { agendamentoStatusArray } from "../../lib/statusConverters";
 
 const AgendamentoEditDialog = ({
   selectedItem,
@@ -32,7 +33,7 @@ const AgendamentoEditDialog = ({
 }: {
   selectedItem: null | Agendamento;
   open: boolean;
-  handleClose: (reloadTable: boolean) => void;
+  handleClose: (reloadTable: boolean, isUpdate: boolean) => void;
 }) => {
   const { setLoadingOverlay } = useLoadingOverlay();
   const [medicos, setMedicos] = useState<Medico[]>([]);
@@ -83,6 +84,8 @@ const AgendamentoEditDialog = ({
   }, []);
 
   useEffect(() => {
+    setLocalAgendamento(selectedItem);
+
     setCreateLocalAgendamento({
       id_paciente: 0,
       id_medico: 0,
@@ -90,34 +93,64 @@ const AgendamentoEditDialog = ({
       data_hora: new Date(),
       observacoes: null,
     });
-  }, [open]);
+  }, [open, selectedItem]);
 
   const handleSave = async () => {
     try {
       setLoadingOverlay({ show: true, message: "Salvando agendamento..." });
-      const bodyData = {
-        id_paciente: createLocalAgendamento.id_paciente,
-        id_medico: createLocalAgendamento.id_medico,
-        id_recepcionista: createLocalAgendamento.id_recepcionista,
-        data_hora: createLocalAgendamento.data_hora
-          ? createLocalAgendamento.data_hora.toISOString()
-          : null,
-        observacoes: createLocalAgendamento.observacoes,
-      };
+      if (selectedItem) {
+        const bodyData = {
+          id_paciente: localAgendamento?.id_paciente,
+          id_medico: localAgendamento?.id_medico,
+          id_recepcionista: localAgendamento?.id_recepcionista,
+          data_hora: localAgendamento?.data_hora
+            ? localAgendamento?.data_hora.toISOString()
+            : null,
+          observacoes: localAgendamento?.observacoes,
+          status: localAgendamento?.status,
+        };
 
-      const response = await fetch("/api/agendamento", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(bodyData),
-      });
+        const response = await fetch(
+          `/api/agendamento/${localAgendamento?.id_agendamento}`,
+          {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(bodyData),
+          }
+        );
 
-      if (!response.ok) {
-        console.log("Erro ao salvar agendamento");
-        throw new Error("Erro ao salvar agendamento");
+        if (!response.ok) {
+          console.log("Erro ao atualizar agendamento");
+          throw new Error("Erro ao atualizar agendamento");
+        }
+        handleClose(true, true);
+      } else {
+        const bodyData = {
+          id_paciente: createLocalAgendamento.id_paciente,
+          id_medico: createLocalAgendamento.id_medico,
+          id_recepcionista: createLocalAgendamento.id_recepcionista,
+          data_hora: createLocalAgendamento.data_hora
+            ? createLocalAgendamento.data_hora.toISOString()
+            : null,
+          observacoes: createLocalAgendamento.observacoes,
+        };
+
+        const response = await fetch("/api/agendamento", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(bodyData),
+        });
+
+        if (!response.ok) {
+          console.log("Erro ao salvar agendamento");
+          throw new Error("Erro ao salvar agendamento");
+        }
+        handleClose(true, false);
       }
-      handleClose(true);
     } catch (e) {
       console.log(e);
     } finally {
@@ -133,7 +166,7 @@ const AgendamentoEditDialog = ({
         <IconButton
           edge="end"
           color="inherit"
-          onClick={() => handleClose(false)}
+          onClick={() => handleClose(false, false)}
           aria-label="close"
         >
           <IoMdClose />
@@ -143,13 +176,105 @@ const AgendamentoEditDialog = ({
       <DialogContent className="flex flex-col gap-6">
         {selectedItem ? (
           <>
-            <Select label="Paciente" value={selectedItem.id_paciente} />
-            <Select label="Médico" value={selectedItem.id_medico} />
-            <Select
-              label="Recepcionista"
-              value={selectedItem.id_recepcionista}
+            <CAutocomplete
+              options={pacientes}
+              mapValue={true}
+              optionValue="id_paciente"
+              optionLabel="nome"
+              label="Paciente"
+              value={
+                pacientes.find(
+                  (paciente) =>
+                    paciente.id_paciente === localAgendamento?.id_paciente
+                ) || null
+              }
+              className="w-full"
+              onChange={(value) =>
+                setLocalAgendamento((prev) =>
+                  prev ? { ...prev, id_paciente: Number(value) } : null
+                )
+              }
             />
-            <DateTimePicker label="Data/Horário" />
+            <CAutocomplete
+              options={medicos}
+              mapValue={true}
+              optionValue="id_medico"
+              optionLabel="nome"
+              label="Médico"
+              className="w-full"
+              value={
+                medicos.find(
+                  (medico) => medico.id_medico === localAgendamento?.id_medico
+                ) || null
+              }
+              onChange={(value) =>
+                setLocalAgendamento((prev) =>
+                  prev ? { ...prev, id_medico: Number(value) } : null
+                )
+              }
+            />
+            <CAutocomplete
+              options={recepcionistas}
+              mapValue={true}
+              optionValue="id_recepcionista"
+              optionLabel="nome"
+              label="Recepcionista"
+              value={
+                recepcionistas.find(
+                  (recepcionista) =>
+                    recepcionista.id_recepcionista ===
+                    localAgendamento?.id_recepcionista
+                ) || null
+              }
+              className="w-full"
+              onChange={(value) =>
+                setLocalAgendamento((prev) =>
+                  prev ? { ...prev, id_recepcionista: Number(value) } : null
+                )
+              }
+            />
+            <TextField
+              label="Data/Horário"
+              type="datetime-local"
+              value={
+                localAgendamento
+                  ? formatDateToInput(localAgendamento?.data_hora)
+                  : ""
+              }
+              onChange={(e) => {
+                const date = new Date(e.target.value);
+                setLocalAgendamento((prev) =>
+                  prev ? { ...prev, data_hora: date } : null
+                );
+              }}
+            />
+            <TextField
+              label="Observações"
+              value={localAgendamento?.observacoes || ""}
+              onChange={(e) =>
+                setLocalAgendamento((prev) =>
+                  prev ? { ...prev, observacao: e.target.value } : null
+                )
+              }
+            />
+            <CAutocomplete
+              className="w-full"
+              label="Status"
+              value={
+                agendamentoStatusArray.find(
+                  (status) => status.id === localAgendamento?.status
+                ) || null
+              }
+              options={agendamentoStatusArray}
+              mapValue={true}
+              optionLabel="nome"
+              optionValue="id"
+              onChange={(value) =>
+                setLocalAgendamento((prev) =>
+                  prev ? { ...prev, status: Number(value) } : null
+                )
+              }
+            />
           </>
         ) : (
           <>
@@ -244,10 +369,16 @@ const AgendamentoEditDialog = ({
           variant="contained"
           onClick={handleSave}
           disabled={
-            !createLocalAgendamento.id_paciente ||
-            !createLocalAgendamento.id_medico ||
-            !createLocalAgendamento.id_recepcionista ||
-            !createLocalAgendamento.data_hora
+            (!createLocalAgendamento.id_paciente ||
+              !createLocalAgendamento.id_medico ||
+              !createLocalAgendamento.id_recepcionista ||
+              !createLocalAgendamento.data_hora) &&
+            (!localAgendamento?.id_paciente ||
+              !localAgendamento?.id_medico ||
+              !localAgendamento?.id_recepcionista ||
+              !localAgendamento?.data_hora ||
+              localAgendamento?.status == null ||
+              localAgendamento?.status == undefined)
           }
         >
           Salvar

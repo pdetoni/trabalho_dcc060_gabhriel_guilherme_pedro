@@ -44,12 +44,14 @@ const Agendamentos = () => {
     setOpenEdit(true);
   };
 
-  const handleCloseEdit = (reloadTable: boolean) => {
+  const handleCloseEdit = (reloadTable: boolean, isUpdate: boolean) => {
     setOpenEdit(false);
     setSelectedItem(null);
     if (reloadTable) {
       fetchAgendamentos();
-      setSnackbarMessage("Agendamento criado com sucesso!");
+      setSnackbarMessage(
+        `Agendamento ${isUpdate ? "atualizado" : "criado"} com sucesso!`
+      );
       setOpenSnackbar(true);
     }
   };

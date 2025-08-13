@@ -6,12 +6,11 @@ export async function GET(request: Request) {
     const queryBuilder = new QueryBuilder();
     queryBuilder
       .append(
-        "select a.id_agendamento, a.id_recepcionista, a.id_paciente, a.id_medico,"
+        "select a.id_agendamento, a.id_recepcionista, a.id_paciente, a.id_medico, a.data_hora, a.status, a.observacoes,"
       )
       .append("p.nome AS nome_recipcionista,")
       .append("p2.nome AS nome_medico,")
-      .append("p3.nome AS nome_paciente,")
-      .append("a.data_hora, a.status")
+      .append("p3.nome AS nome_paciente")
       .append("from agendamento a")
       .append("join recepcionista r on a.id_recepcionista = r.id_recepcionista")
       .append("join funcionario f on f.id_funcionario = r.id_recepcionista")
@@ -24,6 +23,7 @@ export async function GET(request: Request) {
       .append("order by a.data_hora desc");
 
     const result = await pool.query(queryBuilder.toString());
+    console.log(result.rows[0]);
     return new Response(JSON.stringify(result.rows), {
       status: 200,
       headers: { "Content-Type": "application/json" },
@@ -59,6 +59,7 @@ export async function POST(request: Request) {
       data_hora,
       observacoes,
     ];
+    console.log("insert", data_hora);
     await pool.query(queryBuilder.toString(), values);
 
     return new Response(

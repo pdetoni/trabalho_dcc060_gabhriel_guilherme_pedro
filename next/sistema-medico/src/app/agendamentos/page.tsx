@@ -1,6 +1,6 @@
 "use client";
 
-import { Button, CircularProgress, TextField } from "@mui/material";
+import { Button, CircularProgress, Snackbar, TextField } from "@mui/material";
 
 import { Dialog, DialogActions, DialogContent } from "@mui/material";
 
@@ -19,6 +19,8 @@ const Agendamentos = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [selectedItem, setSelectedItem] = useState<null | Agendamento>(null);
   const [agendamentos, setAgendamentos] = useState<Agendamento[]>([]);
+  const [openSnackbar, setOpenSnackbar] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
 
   const fetchAgendamentos = async () => {
     try {
@@ -49,6 +51,8 @@ const Agendamentos = () => {
     setSelectedItem(null);
     if (reloadTable) {
       fetchAgendamentos();
+      setSnackbarMessage("Agendamento criado com sucesso!");
+      setOpenSnackbar(true);
     }
   };
 
@@ -82,6 +86,14 @@ const Agendamentos = () => {
         selectedItem={selectedItem}
         open={openEdit}
         handleClose={handleCloseEdit}
+      />
+      <Snackbar
+        open={openSnackbar}
+        autoHideDuration={6000}
+        onClose={() => {
+          setOpenSnackbar(false);
+        }}
+        message={snackbarMessage}
       />
     </div>
   );

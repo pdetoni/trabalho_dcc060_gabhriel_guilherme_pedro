@@ -23,6 +23,7 @@ import {
 import { useCallback, useEffect, useState } from "react";
 import { formatDateToInput } from "../../lib/formatters";
 import CAutocomplete from "../components/CAutoComplete";
+import { useLoadingOverlay } from "../components/context/loadingOverlay";
 
 const AgendamentoEditDialog = ({
   selectedItem,
@@ -33,6 +34,7 @@ const AgendamentoEditDialog = ({
   open: boolean;
   handleClose: (reloadTable: boolean) => void;
 }) => {
+  const { setLoadingOverlay } = useLoadingOverlay();
   const [medicos, setMedicos] = useState<Medico[]>([]);
   const [pacientes, setPacientes] = useState<Paciente[]>([]);
   const [recepcionistas, setRecepcionistas] = useState<Recepcionista[]>([]);
@@ -80,8 +82,19 @@ const AgendamentoEditDialog = ({
     fetchRecepcionistas();
   }, []);
 
+  useEffect(() => {
+    setCreateLocalAgendamento({
+      id_paciente: 0,
+      id_medico: 0,
+      id_recepcionista: 0,
+      data_hora: new Date(),
+      observacoes: null,
+    });
+  }, [open]);
+
   const handleSave = async () => {
     try {
+      setLoadingOverlay({ show: true, message: "Salvando agendamento..." });
       const bodyData = {
         id_paciente: createLocalAgendamento.id_paciente,
         id_medico: createLocalAgendamento.id_medico,
@@ -102,11 +115,13 @@ const AgendamentoEditDialog = ({
 
       if (!response.ok) {
         console.log("Erro ao salvar agendamento");
-        return;
+        throw new Error("Erro ao salvar agendamento");
       }
       handleClose(true);
     } catch (e) {
       console.log(e);
+    } finally {
+      setLoadingOverlay({ show: false, message: null });
     }
   };
   return (
@@ -225,7 +240,16 @@ const AgendamentoEditDialog = ({
         )}
       </DialogContent>
       <DialogActions>
-        <Button variant="contained" onClick={handleSave}>
+        <Button
+          variant="contained"
+          onClick={handleSave}
+          disabled={
+            !createLocalAgendamento.id_paciente ||
+            !createLocalAgendamento.id_medico ||
+            !createLocalAgendamento.id_recepcionista ||
+            !createLocalAgendamento.data_hora
+          }
+        >
           Salvar
         </Button>
       </DialogActions>

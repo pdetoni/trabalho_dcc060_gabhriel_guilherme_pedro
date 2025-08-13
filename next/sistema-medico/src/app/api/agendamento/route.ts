@@ -60,6 +60,7 @@ export async function POST(request: Request) {
       observacoes,
     ];
     await pool.query(queryBuilder.toString(), values);
+    await new Promise((resolve) => setTimeout(resolve, 10000)); // Simula um delay de 1 segundo
 
     return new Response(
       JSON.stringify({ message: "Agendamento criado com sucesso" }),

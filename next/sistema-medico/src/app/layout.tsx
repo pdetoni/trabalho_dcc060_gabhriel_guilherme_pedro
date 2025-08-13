@@ -3,6 +3,7 @@ import "./globals.css";
 import Header from "./components/Header";
 import Main from "./components/Main";
 import LocalizationDateProvider from "./localizationDateProvider";
+import { LoadingOverlayProvider } from "./components/context/loadingOverlay";
 
 export const metadata: Metadata = {
   title: "Sistema Médico",
@@ -17,10 +18,12 @@ export default function RootLayout({
   return (
     <html lang="pt-BR">
       <body>
-        <LocalizationDateProvider>
-          <Header />
-          <Main>{children}</Main>
-        </LocalizationDateProvider>
+        <LoadingOverlayProvider>
+          <LocalizationDateProvider>
+            <Header />
+            <Main>{children}</Main>
+          </LocalizationDateProvider>
+        </LoadingOverlayProvider>
       </body>
     </html>
   );

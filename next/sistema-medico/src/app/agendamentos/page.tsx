@@ -1,21 +1,20 @@
 "use client";
 
-import { Button, CircularProgress, Snackbar, TextField } from "@mui/material";
-
-import { Dialog, DialogActions, DialogContent } from "@mui/material";
-
-import { IconButton, Toolbar, Typography } from "@mui/material";
+import { Button, CircularProgress, Snackbar } from "@mui/material";
 
 import { useEffect, useState } from "react";
 
-import { IoMdClose } from "react-icons/io";
 import { IoReload } from "react-icons/io5";
 import AgendamentosTable from "./agendamentosTable";
 import { Agendamento, agendamentoSchemaArray } from "../../lib/zodValidators";
 import AgendamentoEditDialog from "./agendamentoEditDialog";
+import AgendamentoDeleteDialog from "./agendamentoDeleteDialog";
+import { useLoadingOverlay } from "../components/context/loadingOverlay";
 
 const Agendamentos = () => {
+  const { setLoadingOverlay } = useLoadingOverlay();
   const [openEdit, setOpenEdit] = useState(false);
+  const [openDelete, setOpenDelete] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedItem, setSelectedItem] = useState<null | Agendamento>(null);
   const [agendamentos, setAgendamentos] = useState<Agendamento[]>([]);
@@ -29,7 +28,6 @@ const Agendamentos = () => {
       const data = await response.json();
       const parsedData = agendamentoSchemaArray.parse(data);
       setAgendamentos(parsedData);
-      console.log("Agendamentos fetched:", parsedData);
     } catch (e) {
       console.error("Erro ao buscar agendamentos:", e);
     } finally {
@@ -60,6 +58,39 @@ const Agendamentos = () => {
     setSelectedItem(null);
     setOpenEdit(true);
   };
+
+  const handleOpenDelete = (agendamento: Agendamento) => {
+    setSelectedItem(agendamento);
+    setOpenDelete(true);
+  };
+
+  const deleteAgendamento = async () => {
+    try {
+      setLoadingOverlay({ show: true, message: "Excluindo agendamento..." });
+      const deletionResponse = await fetch(
+        `/api/agendamento/${selectedItem?.id_agendamento}`,
+        { method: "DELETE" }
+      );
+      if (!deletionResponse.ok) {
+        throw new Error("Erro ao excluir agendamento");
+      }
+      setSnackbarMessage("Agendamento excluído!");
+    } catch (e) {
+      setSnackbarMessage("Erro ao excluir agendamento!");
+    } finally {
+      setOpenSnackbar(true);
+      setLoadingOverlay({ show: false });
+      fetchAgendamentos();
+    }
+  };
+
+  const handleCloseDelete = async (confirmDeletion: boolean) => {
+    if (confirmDeletion) {
+      await deleteAgendamento();
+    }
+    setSelectedItem(null);
+    setOpenDelete(false);
+  };
   return (
     <div className="flex flex-col w-full px-2">
       <h2 className="text-2xl font-bold text-center">Agendamento</h2>
@@ -79,6 +110,7 @@ const Agendamentos = () => {
         <AgendamentosTable
           agendamentos={agendamentos}
           handleOpenEdit={handleOpenEdit}
+          handleOpenDelete={handleOpenDelete}
         />
       )}
 
@@ -86,6 +118,16 @@ const Agendamentos = () => {
         selectedItem={selectedItem}
         open={openEdit}
         handleClose={handleCloseEdit}
+      />
+      <AgendamentoDeleteDialog
+        selectedItem={selectedItem}
+        open={openDelete}
+        confirmDelete={() => {
+          handleCloseDelete(true);
+        }}
+        cancelDelete={() => {
+          handleCloseDelete(false);
+        }}
       />
       <Snackbar
         open={openSnackbar}

@@ -125,7 +125,7 @@ const AgendamentoEditDialog = ({
     }
   };
   return (
-    <Dialog open={open} onClose={handleClose} fullScreen>
+    <Dialog open={open} fullScreen>
       <Toolbar>
         <Typography sx={{ flex: 1 }} variant="h6" component="div">
           {selectedItem ? "Editar Agendamento" : "Cadastrar Agendamento"}

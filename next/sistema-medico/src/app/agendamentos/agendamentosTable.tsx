@@ -18,9 +18,11 @@ import { agendamentoStatusMap } from "../../lib/statusConverters";
 const AgendamentosTable = ({
   agendamentos,
   handleOpenEdit,
+  handleOpenDelete,
 }: {
   agendamentos: Agendamento[];
   handleOpenEdit: (agendamento: Agendamento) => void;
+  handleOpenDelete: (agendamento: Agendamento) => void;
 }) => {
   return (
     <TableContainer component={Paper} className="mt-4">
@@ -111,7 +113,7 @@ const AgendamentosTable = ({
                     className="h-8 "
                     variant="outlined"
                     color="error"
-                    onClick={() => handleOpenEdit(agendamento)}
+                    onClick={() => handleOpenDelete(agendamento)}
                   >
                     <MdDelete size={24} />
                   </Button>

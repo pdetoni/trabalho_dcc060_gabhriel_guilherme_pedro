@@ -43,7 +43,7 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    console.log(body);
+
     const { id_paciente, id_medico, id_recepcionista, data_hora, observacoes } =
       body;
     const queryBuilder = new QueryBuilder();
@@ -60,7 +60,6 @@ export async function POST(request: Request) {
       observacoes,
     ];
     await pool.query(queryBuilder.toString(), values);
-    await new Promise((resolve) => setTimeout(resolve, 10000)); // Simula um delay de 1 segundo
 
     return new Response(
       JSON.stringify({ message: "Agendamento criado com sucesso" }),

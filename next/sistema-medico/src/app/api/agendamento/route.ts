@@ -39,3 +39,43 @@ export async function GET(request: Request) {
     );
   }
 }
+
+export async function POST(request: Request) {
+  try {
+    const body = await request.json();
+    console.log(body);
+    const { id_paciente, id_medico, id_recepcionista, data_hora, observacoes } =
+      body;
+    const queryBuilder = new QueryBuilder();
+    queryBuilder
+      .append(
+        "insert into agendamento (id_paciente, id_medico, id_recepcionista, data_hora, observacoes)"
+      )
+      .append("values ($1, $2, $3, $4, $5)");
+    const values = [
+      id_paciente,
+      id_medico,
+      id_recepcionista,
+      data_hora,
+      observacoes,
+    ];
+    await pool.query(queryBuilder.toString(), values);
+
+    return new Response(
+      JSON.stringify({ message: "Agendamento criado com sucesso" }),
+      {
+        status: 201,
+        headers: { "Content-Type": "application/json" },
+      }
+    );
+  } catch (e) {
+    console.log(e);
+    return new Response(
+      JSON.stringify({ error: "Erro ao criar agendamento" }),
+      {
+        status: 500,
+        headers: { "Content-Type": "application/json" },
+      }
+    );
+  }
+}

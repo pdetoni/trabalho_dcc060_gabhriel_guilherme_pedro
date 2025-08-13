@@ -44,31 +44,14 @@ const AgendamentoEditDialog = ({
     id_medico: number | null;
     id_recepcionista: number | null;
     data_hora: Date | null;
+    observacoes: string | null;
   }>({
     id_paciente: 0,
     id_medico: 0,
     id_recepcionista: 0,
     data_hora: new Date(),
+    observacoes: null,
   });
-
-  /*const fetchMedicos = useCallback(async () => {
-    try {
-      const response = await fetch("/api/medico", { method: "GET" });
-      const data = await response.json();
-      const parsedData = medicoSchemaArray.parse(data);
-      setMedicos(parsedData);
-    } catch (e) {
-      console.error("Erro ao buscar médicos:", e);
-    }
-  },[]);
-
-  const fetchSelectOptions = useCallback(async () =>{
-    try{
-        await fetchMedicos();
-    }catch(e){
-        console.error("Erro ao buscar opções de select:", e);
-    }
-  },[fetchMedicos]); */
 
   useEffect(() => {
     const fetchMedicos = async () => {
@@ -97,9 +80,35 @@ const AgendamentoEditDialog = ({
     fetchRecepcionistas();
   }, []);
 
-  console.log(createLocalAgendamento);
+  const handleSave = async () => {
+    try {
+      const bodyData = {
+        id_paciente: createLocalAgendamento.id_paciente,
+        id_medico: createLocalAgendamento.id_medico,
+        id_recepcionista: createLocalAgendamento.id_recepcionista,
+        data_hora: createLocalAgendamento.data_hora
+          ? createLocalAgendamento.data_hora.toISOString()
+          : null,
+        observacoes: createLocalAgendamento.observacoes,
+      };
 
-  const handleSave = () => {};
+      const response = await fetch("/api/agendamento", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(bodyData),
+      });
+
+      if (!response.ok) {
+        console.log("Erro ao salvar agendamento");
+        return;
+      }
+      handleClose(true);
+    } catch (e) {
+      console.log(e);
+    }
+  };
   return (
     <Dialog open={open} onClose={handleClose} fullScreen>
       <Toolbar>
@@ -201,6 +210,16 @@ const AgendamentoEditDialog = ({
                   data_hora: date,
                 }));
               }}
+            />
+            <TextField
+              label="Observações"
+              value={createLocalAgendamento.observacoes || ""}
+              onChange={(e) =>
+                setCreateLocalAgendamento((prev) => ({
+                  ...prev,
+                  observacoes: e.target.value,
+                }))
+              }
             />
           </>
         )}
